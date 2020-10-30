@@ -146,9 +146,24 @@ class Norminette
         puts "\033[1;97mFile: \033[0m   #{cleanify_path(result['filename'])}"       if result['filename']
         puts "\033[0;33m  Warning:%20s\033[0m#{result['display'][8..-1]}" % [""]    if result['display'] && result['display'].start_with?("Warning")
         if result['errors'] && result['errors'].length > 0
-            @sorted = result['errors'].sort_by { |a| [a["line"], a["reason"]] }
+            @sorted = result['errors'].sort_by { |a| [a["line"] ? a["line"] : 0, a["reason"]] }
             @sorted.each do |error|
-              puts "  \033[0;31mError: \033[0mline: %3d   %5s%-4s %s" % [error["line"], error["col"] ? "col: ":"", error["col"], error["reason"]]
+                print "  \033[0;31mError: \033[0m"
+                if error["line"]
+                    print "line %3d    " % error["line"]
+                else
+                    print "%12s" % [""]
+                end
+                if error["col"]
+                    print "col: %3d   " % [error["col"]]
+                else
+                    print "%11s" % [""]
+                end
+                if error["reason"]
+                    print "%s\n" % error["reason"]
+                else
+                    print "\n"
+                end
             end
         else
             puts "  \033[0;32mAll is okay!\033[0m"                                  if !result['display']
