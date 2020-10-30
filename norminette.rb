@@ -25,7 +25,7 @@ class Sender
                             vhost: 		"/",
                             user: 		$config['user'],
                             password: 	$config['password']
-        
+
         @conn.start
         @ch 			= @conn.create_channel
         @x  			= @ch.default_exchange
@@ -77,7 +77,7 @@ class Norminette
 
     def check files_or_directories, options
         if options.version
-            version 
+            version
         else
             populate_recursive files_or_directories.any? ? files_or_directories : [$current_path]
             send_files options
@@ -143,9 +143,17 @@ class Norminette
     end
 
     def manage_result result
-        puts "Norme: #{cleanify_path(result['filename'])}" 	if result['filename']
-        puts result['display']	 							if result['display']
-        exit 0 												if result['stop'] == true
+        puts "\033[1;97mFile: \033[0m   #{cleanify_path(result['filename'])}"       if result['filename']
+        puts "\033[0;33m  Warning:%20s\033[0m#{result['display'][8..-1]}" % [""]    if result['display'] && result['display'].start_with?("Warning")
+        if result['errors'] && result['errors'].length > 0
+            @sorted = result['errors'].sort_by { |a| [a["line"], a["reason"]] }
+            @sorted.each do |error|
+              puts "  \033[0;31mError: \033[0mline: %3d   %5s%-4s %s" % [error["line"], error["col"] ? "col: ":"", error["col"], error["reason"]]
+            end
+        else
+            puts "  \033[0;32mAll is okay!\033[0m"                                  if !result['display']
+        end
+        exit 0                                                                      if result['stop'] == true
     end
 end
 
